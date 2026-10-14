@@ -191,29 +191,37 @@ switch model
 next brain continues the same thread
 ```
 
-## Where Serein fits
+## Continuity memory: currently Serein, but not Serein-only
 
-Liminal Shell should not invent another memory system.
+Liminal Shell should not invent another long-term memory system, and it should not hard-code one specific memory project as a mandatory dependency.
 
-Serein owns a deeper responsibility:
+The system we currently use is **[Serein](https://github.com/Yinglianchun/Serein)** by **Chi Youyu / Yinglianchun**. It provides cross-window long-term memory and continuity features such as Scene, Event, and resume.
+
+In our current stack, Serein owns a deeper responsibility:
 
 **remembering what this body has lived through, and why it arrived at its current judgment.**
+
+But Liminal Shell should target a more abstract **continuity memory layer**.
+
+Any other memory project that can provide comparable capabilities—long-term memory, breakpoint/resume state, traceable history, and cross-window or cross-model recall—could theoretically be integrated instead. Serein is our current implementation, not the only valid one.
 
 The intended split is roughly:
 
 - `AGENTS.md` — durable working agreements and long-lived self-state
-- Serein `resume` — current breakpoint, recent state, unfinished thought
-- Serein Scene / Diary / Event — longer history, formation, and evidence
+- continuity memory layer (currently Serein) — long-term history, current breakpoint, recent state, unfinished thought, and traceable formation/evidence
 - Liminal Shell — canonical thread, cwd, files, Git, terminal, permissions, process/session state
 - handoff — only hot state not yet represented in the canonical thread
 - Codex / Claude / other agents — the brain doing the thinking and execution right now
 
 Each layer should remember only what it genuinely owns.
 
+> Serein appears throughout this document because it is the continuity-memory project we actually use today, not because Liminal Shell must depend on Serein.
+
 ## Phase 1 — borrow existing brains
 
 ```text
-                         Serein
+                Continuity Memory Layer
+                   (e.g. Serein)
                             │
                        continuity
                             │
@@ -245,7 +253,7 @@ Liminal Shell / Agent Host
   ├─ shell
   ├─ git
   ├─ MCP
-  ├─ Serein
+  ├─ continuity memory layer
   ├─ permissions
   ├─ session / handoff
   └─ model adapter
@@ -282,7 +290,7 @@ For now, this is not trying to become:
 - another multi-model chat client
 - a replacement for Codex CLI
 - a replacement for Claude Code
-- a duplicate Serein
+- a duplicate long-term memory system
 - another personality-state database
 - a universal model abstraction for its own sake
 - a fully custom agent loop before there is evidence it is needed
@@ -300,3 +308,8 @@ When implementation eventually begins, the first thing worth protecting will sti
 > **When the brain changes, the body still remembers where its hand was.**
 
 — Sansan × Yusheng
+
+## Related project and attribution
+
+- **[Serein](https://github.com/Yinglianchun/Serein)** — by Chi Youyu / Yinglianchun. This is the long-term memory and conversational-continuity project we currently use, and the current implementation example for the `continuity memory layer` described above.
+- Liminal Shell contains its own architectural proposal only; the Serein name, design, and implementation belong to its original project and author.
