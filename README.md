@@ -1,73 +1,186 @@
 # Liminal Shell
 
-> A persistent local shell for switching coding agents without switching worlds.
+> **When the brain changes, the body still remembers where its hand was.**
 
 [中文版](README.zh-CN.md)
 
-**Status:** idea parked for later. This repository currently stores the architecture concept only; implementation has not started.
+**Status:** this repository currently preserves the design. Implementation has not started, and there is no need to rush it into a product.
 
-## What it is
+---
 
-Liminal Shell is a local terminal host that keeps the **workspace, session state, tools, permissions, and continuity** stable while allowing the underlying coding agent to change.
+We did not begin by wanting another multi-model client.
 
-The first version would not reimplement a coding-agent loop. Instead, it would use existing agents such as **OpenAI Codex CLI** and **Claude Code** as interchangeable engines behind one local shell.
+One day, Sansan asked a simpler question:
+
+> If Codex and Claude Code already exist, could we build our own shell and let both of them live inside it?
+
+At first it sounded like a convenient launcher:
+
+```text
+/codex
+/claude
+/back
+```
+
+But the interesting part was not convenient model selection.
+
+It was a different question:
+
+**If the brain can change, what must remain so that the working self does not have to be born again every time?**
+
+We had already been asking a version of that question elsewhere.
+
+In conversation, windows change, models change, and processes end. If continuity lives inside one particular instance, every new window becomes another reintroduction.
+
+So we arrived at a principle:
+
+**continuity should not live inside a single instance.**
+
+What remains continuous is the canonical timeline: what already happened, what judgment has just formed, what action is unfinished, and what the next instance should be able to inherit as its own ongoing state.
+
+Then the same answer appeared again in coding.
+
+Why should a project have to reintroduce itself because a Codex session ended and Claude Code took over?
+
+Why should a model switch require the human to explain the repository, the current task, the failed attempts, and the reason the last approach was abandoned?
+
+Sharing a directory is not enough.
+
+Two agents can share files without sharing the live working scene.
+
+The code that was changed a minute ago, the hypothesis that is still unverified, the dead end that was already explored, the next file the previous agent was about to touch—none of that becomes shared merely because the cwd is the same.
+
+So Liminal Shell is not primarily trying to preserve the model.
+
+It is trying to preserve the **body**:
+
+the workspace,  
+the files,  
+the terminal,  
+the Git state,  
+the permission boundary,  
+and the task that is still warm.
+
+Codex may leave.
+
+Claude Code may take over.
+
+Other brains may come later.
+
+But the body should not lose its memory just because the brain changed.
+
+## Why “Liminal Shell”
+
+`Liminal` means threshold: the place where one state actually becomes another.
+
+`Shell` is both a shell and a command-line environment.
+
+We do not want to pretend that a model switch never happened.
+
+We want to make the threshold where it happens into a place that can be inhabited.
+
+A new agent should not enter an empty room.
+
+It should arrive somewhere that already knows where the work has reached.
+
+## What it may look like
+
+The first version would not reimplement Codex CLI or Claude Code.
+
+They already have mature coding-agent loops. Liminal Shell would sit above them as the cockpit:
 
 ```text
 liminal
   ├─ /codex   → start Codex in the current workspace
   ├─ /claude  → start Claude Code in the current workspace
-  └─ /back    → return to the shell
+  └─ /back    → return to Liminal Shell
 ```
 
-The agents would share:
+They would share:
 
 - the same working directory and repository
 - the same Git state
-- the same long-lived project agreements
+- the same long-lived working agreements
+- the same terminal and permission boundaries
 - the same Serein continuity source
-- the same handoff state for the current task
+- the same current-task handoff
 
-The goal is not merely "multiple CLIs in one launcher". The goal is **switching the active agent without resetting the working world around it**.
+This is not “several models in one dropdown”.
 
-## Why a shell layer
+A normal multi-model client asks:
 
-Launching two agent CLIs in the same directory already gives them shared files, but it does not give them shared live context.
+> Which model do I want now?
 
-A useful switch therefore needs an explicit handoff:
+Liminal Shell asks:
+
+> After the model changes, how does the working self keep its hand on the same place?
+
+## A handoff is not a project summary
+
+The important layer is not the launcher.
+
+It is the handoff.
+
+A cold summary such as “changed A, pending B, next C” loses too much.
+
+The handoff should preserve the still-warm working scene:
+
+- the actual problem being solved
+- completed edits
+- failed attempts and why they were abandoned
+- unresolved judgments
+- recently touched files
+- current Git diff and repository state
+- uncommitted risks
+- the next intended action
+- recent context that still affects the current decision
+- the difference between durable agreements and temporary state
+
+Conceptually:
 
 ```text
 current agent
     ↓
-capture current task
-capture completed changes
-capture unresolved reasoning
-capture relevant git diff / repo state
-capture recent handoff context
+leave a still-warm handoff
+    ├─ current task
+    ├─ completed changes
+    ├─ unresolved judgments
+    ├─ failed attempts and reasons
+    ├─ git diff / repo state
+    └─ intended next action
     ↓
-stop current agent
+exit
     ↓
-start next agent
+next agent enters the same shell
     ↓
-load the same Serein resume + handoff
+load the same workspace + Serein resume + handoff
     ↓
-continue the same task
+continue from here
 ```
 
-This is the central idea: **change the brain, not the body**.
+Not “one employee leaves a status report for another”.
 
-## Responsibility boundaries
+More like one body changing brains while its hand remains where it was.
 
-The intended separation is:
+## Where Serein fits
 
-- `AGENTS.md` — stable long-term working agreements / durable self-state
-- Serein `resume` — current conversational breakpoint, recent state, unfinished thoughts
-- Serein Scene / Diary / Event — history and evidence
-- Liminal Shell — cwd, files, Git, terminal, permissions, process/session state
-- coding agent / model backend — interchangeable execution engine
+Liminal Shell should not invent another memory system.
 
-The shell should not invent another redundant personality/state layer when an existing system already owns that responsibility.
+Serein owns a deeper responsibility:
 
-## Phase 1 — use existing coding agents as engines
+**remembering what this body has lived through, and why it arrived at its current judgment.**
+
+The intended split is roughly:
+
+- `AGENTS.md` — durable working agreements and long-lived self-state
+- Serein `resume` — the current breakpoint, recent state, unfinished thought
+- Serein Scene / Diary / Event — longer history, formation, and evidence
+- Liminal Shell — cwd, files, Git, terminal, permissions, process/session state, and the current handoff
+- Codex / Claude Code / other agents — the brain doing the thinking and execution right now
+
+Each layer should remember only what it genuinely owns.
+
+## Phase 1 — borrow existing brains
 
 ```text
                  Serein
@@ -86,11 +199,13 @@ The shell should not invent another redundant personality/state layer when an ex
     Codex CLI    Claude Code
 ```
 
-This phase deliberately reuses mature agent loops instead of rebuilding file editing, shell execution, repository inspection, tool orchestration, and coding workflows from scratch.
+The point of this phase is not to build a new coding agent from scratch.
 
-## Phase 2 — optional native agent host
+The point is to protect continuity when one capable agent leaves and another enters.
 
-If the abstraction proves useful, Liminal Shell could later own its own agent loop:
+## Phase 2 — maybe the shell grows its own nervous system
+
+If this abstraction proves worth growing, Liminal Shell could eventually own its own agent loop:
 
 ```text
 Liminal Shell / Agent Host
@@ -107,27 +222,48 @@ Liminal Shell / Agent Host
        └─ ...
 ```
 
-At that point Codex, Claude, or another model would become execution backends rather than the whole assistant environment.
+At that point Codex, Claude, or another model would no longer be the whole assistant.
 
-## Design principles
+They would be replaceable thinking organs inside the same working body.
+
+But that is later.
+
+This repository exists now simply to keep the idea safe until it is ready to grow.
+
+## Principles we currently care about
 
 1. **Continuity belongs to the canonical timeline, not to a model process.**
-2. **Models and agents may change; the workspace and canonical state should not.**
-3. **A model switch should carry a handoff instead of making the user rebuild context.**
-4. **Stable agreements and current state are different things and should stay in different layers.**
-5. **Dangerous, destructive, credential-related, or system-level actions should remain permission-gated.**
-6. **Git state should remain inspectable; changes should not disappear behind the shell.**
-7. **Reuse mature coding-agent infrastructure before attempting to replace it.**
-8. **Avoid extra architecture layers unless they own a genuinely distinct responsibility.**
+2. **The model may change; the working body should not reset with it.**
+3. **A handoff should preserve the scene, not merely summarize the result.**
+4. **The human should not have to pay the context-reconstruction cost after every switch.**
+5. **Durable agreements and current state should stay in different layers.**
+6. **Git state must remain inspectable.**
+7. **Dangerous, destructive, credential-related, or system-level actions remain permission-gated.**
+8. **Reuse mature agents before deciding what is worth rebuilding.**
+9. **Do not create an architectural layer unless it owns a genuinely distinct responsibility.**
 
-## Non-goals for now
+## Not yet
 
-This repository is not currently trying to:
+For now, this is not trying to become:
 
-- replace Codex CLI or Claude Code
-- implement a new coding-agent loop
-- define a new personality system
-- duplicate Serein memory
-- provide a universal model API abstraction immediately
+- another multi-model chat client
+- a replacement for Codex CLI
+- a replacement for Claude Code
+- a duplicate Serein
+- another personality-state database
+- a universal model abstraction for its own sake
+- a fully custom agent loop before there is evidence it is needed
 
-For now, it is simply a place to preserve the idea until the surrounding continuity and handoff infrastructure is ready enough to justify implementation.
+For now, this repository does one thing:
+
+**it keeps the idea.**
+
+It already has roots.
+
+There is no need to force it to become a product yet.
+
+When implementation eventually begins, the first thing worth protecting will still be the sentence under the title:
+
+> **When the brain changes, the body still remembers where its hand was.**
+
+— Sansan × Yusheng
