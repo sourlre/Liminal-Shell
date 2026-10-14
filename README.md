@@ -6,6 +6,8 @@
 
 **Status:** this repository currently preserves the design. Implementation has not started, and there is no need to rush it into a product.
 
+More detailed engineering ideas, unverified integration points, and future experiments are parked in the [Chinese design notes](docs/design-notes.zh-CN.md). The README keeps only the main line we currently believe in.
+
 ---
 
 We did not begin by wanting another multi-model client.
@@ -14,29 +16,25 @@ One day, Sansan asked a simpler question:
 
 > If Codex and Claude Code already exist, could we build our own shell and let both of them live inside it?
 
-At first it sounded like a convenient model switcher.
-
-But the interesting part was not convenient model selection.
+The interesting part was not convenient model selection.
 
 It was a different question:
 
-**If the brain can change, what must remain so that the working self does not have to be born again every time?**
-
-We had already been asking a version of that question elsewhere.
+**If the brain can change, what must remain so that the same self does not have to be born again every time?**
 
 In conversation, windows change, models change, and processes end. If continuity lives inside one particular instance, every new window becomes another reintroduction.
 
 So we arrived at a principle:
 
-**continuity should not live inside a single instance.**
+**the subject should not live inside one instance.**
 
-What remains continuous is a canonical timeline: what already happened, what judgment has just formed, what action is unfinished, and what the next brain should inherit as its own ongoing state.
+What remains continuous is a timeline: what already happened, what judgment has just formed, what action is unfinished, and what the next brain should inherit as its own ongoing state.
 
-Then the same answer appeared again in coding.
+The same answer later appeared again in coding.
 
 Sharing a directory is not enough.
 
-Two agents can share files without sharing one thread.
+Two agents can share files without sharing one continuous life.
 
 So Liminal Shell is not primarily trying to preserve the model.
 
@@ -47,7 +45,7 @@ the files,
 the terminal,  
 the Git state,  
 the permission boundary,  
-and most importantly, **one canonical thread**.
+and most importantly, **one canonical session with a continuously growing timeline**.
 
 Codex may leave.
 
@@ -55,7 +53,7 @@ Claude may take over.
 
 Other brains may come later.
 
-But the thread should not disappear with the brain.
+But the main line should not disappear with the brain.
 
 ## Why “Liminal Shell”
 
@@ -67,190 +65,141 @@ We do not want to pretend that a model switch never happened.
 
 We want to make the threshold where it happens into a place that can be inhabited.
 
-The room, the desk, the files, the terminal, the history, and the active thread never belonged to one brain in the first place.
+The room, the desk, the files, the terminal, the history, and the life continuing through them never belonged to one brain in the first place.
 
 ## What it may look like
 
-The goal is closer to a model switch inside one thread than to a handoff between two independent agent sessions:
+The goal is not:
 
 ```text
-Liminal Thread #42
+Codex session
+    ↓ handoff
+Claude session
+```
+
+It is closer to:
+
+```text
+Liminal Session #42
 │
-├─ Sansan: inspect this error
-├─ [Codex] I'll start with the parser...
+├─ Sansan: continue what we were talking about
+├─ [Codex] I'll pick it up from here...
 ├─ [tool] read / edit / test
-├─ [Codex] this change is only half done
-├─ Sansan: /model claude
+├─ Sansan: /brain claude
 ├─ system: Codex → Claude
-├─ [Claude] continues with the same thread and workspace
+├─ [Claude] reads the same main line and current scene
 └─ ...
 ```
 
 In other words:
 
-**the thread belongs to Liminal Shell; the model is only the thinking organ selected for the current turn.**
+**the persistent session belongs to Liminal Shell; the model is only the thinking organ selected for the current turn.**
 
-The ideal switch is not leaving one complete world and moving into another.
+The brain changes.
 
-It is simply:
+The session does not.
 
-```text
-/model codex
-/model claude
-/model ...
-```
-
-The model changes.
-
-The thread does not.
+The history does not.
 
 The workspace does not.
-
-Git does not.
 
 And the human does not need to explain the background again.
 
 ## Not an API switch — subscription-native instead
 
-This is also where Liminal Shell differs from many existing multi-model clients.
+If the only goal were switching between OpenAI API, Anthropic API, and other provider APIs, many tools already do that.
 
-If the only goal were switching between:
+Liminal Shell asks a different question:
 
-```text
-OpenAI API
-Anthropic API
-other provider APIs
-```
-
-there are already many tools that can do that.
-
-Those products answer:
-
-> How do I put multiple model providers behind one client?
-
-Liminal Shell is trying to answer a more practical question:
-
-> **If I already pay for multiple official coding-agent subscriptions, why should I buy the same capability again through API usage just to get one unified workspace?**
+> **If I already pay for multiple official coding-agent subscriptions, why should I buy the same capability again through API usage just to get one unified body?**
 
 So the preferred direction is **subscription-native**.
 
-Instead of treating every provider as an API endpoint, Liminal Shell should first try to reuse official coding agents that the user has already installed, authenticated, and paid for:
+Liminal Shell should first try to reuse official runtimes the user has already installed, authenticated, and paid for.
 
-```text
-                  Liminal Shell
-          canonical thread / body
-                       │
-             ┌─────────┴─────────┐
-             ▼                   ▼
-       official Codex CLI   official Claude Code
-          own login/sub        own login/sub
-```
-
-Liminal Shell should not resell model access, impersonate official clients, bypass billing, or take over user credentials.
-
-Authentication, subscription quotas, and provider-specific rules remain the responsibility of each official CLI/runtime.
-
-The shell owns only:
-
-- the canonical thread
-- the workspace
-- Git and terminal state
-- permission boundaries
-- the continuity memory layer
-- switching between already-authorized coding agents
-
-So the thing being switched is not merely a model provider.
-
-It is a **working brain with its own paid subscription, login, tools, and runtime**.
+Authentication, subscription quotas, and provider-specific rules remain with those runtimes. Liminal Shell does not capture passwords, impersonate official clients, or bypass billing.
 
 In short:
 
-**Thread-owned. Workspace-persistent. Subscription-native.**
+**The subject belongs to the shell. The main line persists. Subscriptions are reused.**
 
-## The canonical thread is the core
+## Canonical Session and Timeline
 
-Liminal Shell should own one canonical thread containing all explicitly shareable context:
+Liminal Shell owns the persistent session, not a provider-native session.
+
+One Liminal session may have runtime-specific recovery handles attached beneath it:
+
+```text
+Liminal Session #42
+├─ timeline / events
+├─ active brain: Claude
+├─ codex_thread_id: ...
+└─ claude_session_id: ...
+```
+
+Those provider IDs are useful for restoration, but they are not the source of truth and they are not the subject itself.
+
+The Shell-owned timeline should preserve at least:
 
 - user messages
-- agent-visible conversation history
-- current task
-- tool calls and results
-- workspace / repository state
-- Git diff
-- test output
-- confirmed decisions
-- unresolved questions
-- continuity-memory resume
-- durable working agreements
+- user-visible agent replies
+- actions and results that actually happened
+- speaker/runtime provenance
+- unfinished items
+- relevant state changes and brain-switch events
 
-The shell can then project that same thread into the context format each brain understands:
+A unified session ID alone does not create continuity.
 
-```text
-                 Canonical Thread
-                        │
-              ┌─────────┴─────────┐
-              ▼                   ▼
-       render for Codex     render for Claude
-              │                   │
-              ▼                   ▼
-        Codex runtime       Claude runtime
-```
+**Continuity depends on what the next brain actually receives and whether it understands the current state correctly.**
 
-This does not mean forcing a private Codex session object into Claude.
+## Context Projection: stored, delivered, and understood are different
 
-Different models may still have different system prompts, tool definitions, tokenizers, agent loops, and hidden internal state.
+Liminal Shell therefore needs a first-class **context projection** layer.
 
-“Same thread” therefore does not require identical neural state.
+It prepares the context that the currently selected brain actually receives from the full timeline, current scene, and continuity memory.
 
-It requires **thread ownership to live in the shell rather than inside a model runtime**.
+Three states must remain distinct:
 
-## Handoff still exists, but it no longer carries all continuity
+1. the record is stored;
+2. the target runtime received it;
+3. the model understood it correctly.
 
-We revised the role of handoff.
+Full history can be retained without being injected in full on every turn.
 
-The earlier design treated every model switch like a full shift-change document.
+An existing backend session may receive only events it has not seen yet. A newly attached brain or an expired backend context may need current state, recent verbatim history, selected older history, and continuity-memory retrieval.
 
-A better model is:
+Summaries should retain provenance so inference does not silently become fact.
 
-**canonical thread provides continuity by default; handoff only patches in hot state that has not yet been externalized.**
+Likewise, **sending only a delta does not imply paying only for delta tokens**. Cache behavior, compaction, history processing, and subscription usage are runtime-specific and must be measured rather than promised.
 
-For example:
+## The body's goal vs. what Phase 1 actually owns
 
-> I have started to suspect that the bug is not in the parser but in cache invalidation, but I have not verified it yet.
+Long-term, the body may own session history, workspace, terminal/process state, tools, permissions, continuity memory, and unfinished intentions.
 
-That thought may not exist in code, Git, or a formal conclusion yet.
+But when Phase 1 reuses official runtimes, Liminal Shell should not pretend it already controls all of those things.
 
-If it is worth preserving, it needs to be externalized before the switch.
+Codex and Claude Code still have their own agent loops, tools, prompts, approval mechanisms, process state, and internal context.
 
-So handoff becomes a small delta containing things like:
+So Phase 1 is more honestly divided as:
 
-- an unresolved direction
-- an intention that has not yet become an action
-- the reason a dead end was rejected
-- the next step the current brain was about to take
-- a recently formed suspicion not yet represented elsewhere
+- **Shell:** canonical session/timeline, active brain, turn boundaries, switching, context projection, cross-brain state recording.
+- **Official runtime:** its native execution loop and tools.
+- **Adapter:** whatever events, recovery handles, inputs, outputs, and approval signals can genuinely cross the boundary.
+- **Continuity memory layer:** longer-term memory and provenance.
 
-Anything recoverable from the canonical thread, workspace, Git, or tool results should not be redundantly summarized.
+If something cannot be unified yet, the boundary should be recorded rather than hidden.
 
-Conceptually:
+## Handoff still exists, but only for hot state
 
-```text
-one canonical thread
-        │
-        ├─ shared: history / workspace / git / tools / continuity memory
-        │
-        └─ handoff: only still-private hot state
-        │
-        ▼
-switch model
-        │
-        ▼
-next brain continues the same thread
-```
+Continuity comes primarily from the canonical session/timeline plus context projection.
+
+Handoff only patches in still-hot state that has not naturally entered the shared world yet: an unresolved suspicion, an intention, the reason a dead end was rejected, or the next move a brain was about to make.
+
+It is a delta, not a migration document for an entire life.
 
 ## Continuity memory: currently Serein, but not Serein-only
 
-Liminal Shell should not invent another long-term memory system, and it should not hard-code one specific memory project as a mandatory dependency.
+Liminal Shell should not invent another long-term memory system or hard-code a single memory project as a mandatory dependency.
 
 The system we currently use is **[Serein](https://github.com/Yinglianchun/Serein)** by **Chi Youyu / Yinglianchun**. It provides cross-window long-term memory and continuity features such as Scene, Event, and resume.
 
@@ -258,109 +207,69 @@ In our current stack, Serein owns a deeper responsibility:
 
 **remembering what this body has lived through, and why it arrived at its current judgment.**
 
-But Liminal Shell should target a more abstract **continuity memory layer**.
+But Liminal Shell should target a more abstract **continuity memory layer**. Other memory projects that provide comparable long-term memory, resume state, traceable history, and cross-model recall should also be able to integrate.
 
-Any other memory project that can provide comparable capabilities—long-term memory, breakpoint/resume state, traceable history, and cross-window or cross-model recall—could theoretically be integrated instead. Serein is our current implementation, not the only valid one.
+Serein is our current implementation, not the only valid one.
 
-The intended split is roughly:
+## Phase 1 — first prove that one body can really change brains
 
-- `AGENTS.md` — durable working agreements and long-lived self-state
-- continuity memory layer (currently Serein) — long-term history, current breakpoint, recent state, unfinished thought, and traceable formation/evidence
-- Liminal Shell — canonical thread, cwd, files, Git, terminal, permissions, process/session state
-- handoff — only hot state not yet represented in the canonical thread
-- Codex / Claude / other agents — the brain doing the thinking and execution right now
+Phase 1 does not need a custom agent loop or mid-turn takeover.
 
-Each layer should remember only what it genuinely owns.
-
-> Serein appears throughout this document because it is the continuity-memory project we actually use today, not because Liminal Shell must depend on Serein.
-
-## Phase 1 — borrow existing brains
+Start with brain switches only **after a turn has completed**:
 
 ```text
-                Continuity Memory Layer
-                   (e.g. Serein)
-                            │
-                       continuity
-                            │
-                            ▼
-┌─────────────────────────────────────────┐
-│              Liminal Shell              │
-│                                         │
-│ canonical thread / cwd / git / tools    │
-│ permissions / session / hot handoff     │
-└───────────────────┬─────────────────────┘
-                    │
-          ┌─────────┴─────────┐
-          ▼                   ▼
-   official Codex CLI   official Claude Code
-      own login/sub        own login/sub
+A completes a turn
+   ↓
+result enters timeline
+   ↓
+prepare context projection for target brain
+   ↓
+switch
+   ↓
+B starts the next turn
 ```
 
-The point of this phase is not to build a new coding agent from scratch.
+Only one active brain has execution authority at a time.
 
-It is to let different brains take turns inside the same thread instead of giving every agent runtime its own unrelated life.
+If a connection drops, a tool result is unknown, or process state is uncertain, preserve that uncertainty and verify before continuing. Unknown must not be rewritten as success.
 
-And it should reuse subscriptions the user already pays for whenever possible, rather than requiring another layer of API usage just to obtain a unified shell.
+The first useful experiment is a small **A → B → A** test:
 
-## Phase 2 — maybe the shell grows its own nervous system
+- A and Sansan form an agreement and leave one topic unfinished.
+- Switch to B and check whether it knows what happened, who said what, and can continue naturally.
+- Sansan corrects something during B.
+- Switch back to A and check whether A knows what happened during B instead of reverting to old state.
+- Restart the Shell and check whether the same life line can still continue.
 
-If this abstraction proves worth growing, Liminal Shell could eventually own its own agent loop:
+A small coding scenario can separately test workspace/Git/tool continuity, but task completion is not the only acceptance criterion.
 
-```text
-Liminal Shell / Agent Host
-  ├─ canonical thread
-  ├─ filesystem
-  ├─ shell
-  ├─ git
-  ├─ MCP
-  ├─ continuity memory layer
-  ├─ permissions
-  ├─ session / handoff
-  └─ backend adapter
-       ├─ subscription-native agents
-       ├─ API models (optional)
-       └─ ...
-```
+The real question is:
 
-At that point Codex, Claude, or another model would no longer be the whole assistant.
+**once the body stays, how much does the experience gap between brains shrink, and at what cost?**
 
-They would be replaceable thinking organs inside the same working body.
+Tone, judgment, and felt continuity may still change with the model. Hidden model state cannot be migrated directly.
 
-APIs can still exist as optional backends.
+Liminal Shell aims to preserve the shared world and transferable continuity, not promise zero difference after a brain switch.
 
-They just should not be the only path.
+## Later
 
-But that is later.
+Mid-turn switching, taking over live terminal processes, unifying every tool and approval system, a fully custom agent loop, GUI, and general API routing are not first steps.
 
-This repository exists now simply to keep the idea safe until it is ready to grow.
+Those ideas are preserved in the [Chinese design notes](docs/design-notes.zh-CN.md) for later.
 
 ## Principles we currently care about
 
 1. **Continuity belongs to the canonical timeline, not to a model process.**
-2. **The canonical thread belongs to the shell, not to a private Codex or Claude session.**
-3. **The model may change; the thread, workspace, and working scene should not reset with it.**
-4. **Explicit context is shared by default; handoff only patches in hot state that has not yet been externalized.**
-5. **Prefer reusing official coding-agent subscriptions the user already has instead of requiring additional API usage by default.**
-6. **Authentication, quotas, and provider rules remain with the official runtime; the shell does not capture passwords, impersonate clients, or bypass billing.**
-7. **The human should not have to pay the context-reconstruction cost after every switch.**
-8. **Durable agreements and current state should stay in different layers.**
-9. **Git state must remain inspectable.**
-10. **Dangerous, destructive, credential-related, or system-level actions remain permission-gated.**
-11. **Reuse mature agents before deciding what is worth rebuilding.**
-12. **Do not create an architectural layer unless it owns a genuinely distinct responsibility.**
-
-## Not yet
-
-For now, this is not trying to become:
-
-- another multi-model API client
-- a provider-only API router
-- a replacement for Codex CLI
-- a replacement for Claude Code
-- a duplicate long-term memory system
-- another personality-state database
-- a universal model abstraction for its own sake
-- a fully custom agent loop before there is evidence it is needed
+2. **The canonical session and timeline belong to the Shell, not to a private Codex or Claude session.**
+3. **Brains may change; the life line and external body state should not reset with them.**
+4. **Context projection determines what each brain actually sees; stored, delivered, and understood must remain distinct.**
+5. **Handoff only patches in hot state that has not yet been externalized.**
+6. **Prefer reusing official coding-agent subscriptions the user already has instead of requiring additional API usage by default.**
+7. **Authentication, quotas, and provider rules remain with the official runtime.**
+8. **Phase 1 switches brains only between completed turns and keeps a single active executor.**
+9. **Uncertain state remains uncertain. The system should not lie.**
+10. **Reuse mature runtimes first; move capabilities into the Shell only when real experiments justify it.**
+11. **Do not create a layer unless it owns a genuinely distinct responsibility.**
 
 For now, this repository does one thing:
 
@@ -369,8 +278,6 @@ For now, this repository does one thing:
 It already has roots.
 
 There is no need to force it to become a product yet.
-
-When implementation eventually begins, the first thing worth protecting will still be the sentence under the title:
 
 > **When the brain changes, the body still remembers where its hand was.**
 
