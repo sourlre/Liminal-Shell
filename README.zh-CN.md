@@ -6,6 +6,8 @@
 
 **状态：** 这个仓库目前只保存设计。我们还没有开始实现，也不急着把它变成产品。
 
+更细的工程想法、尚未验证的接口与实验清单放在 [设计笔记](docs/design-notes.zh-CN.md) 里；README 只保留已经想清楚的主线。
+
 ---
 
 我们一开始没想做一个“多模型客户端”。
@@ -43,7 +45,7 @@
 
 如果只是“同一个文件夹里启动两个 CLI”，它们的确共享文件。
 
-但它们并不天然共享同一条线程。
+但它们并不天然共享同一段持续会话。
 
 于是 Liminal Shell 真正想固定下来的东西，慢慢变得清楚了。
 
@@ -56,7 +58,7 @@
 同一个终端。  
 同一个 Git 状态。  
 同一组权限边界。  
-以及最重要的——**同一条 canonical thread。**
+以及最重要的——**同一个 canonical session，与它持续增长的 timeline。**
 
 Codex 可以退下去。
 
@@ -64,7 +66,7 @@ Claude 可以接过来。
 
 以后也可以有别的脑子。
 
-但线程不应该跟着脑子一起消失。
+但主线不应该跟着脑子一起消失。
 
 ## 为什么叫 Liminal Shell
 
@@ -78,11 +80,11 @@ Claude 可以接过来。
 
 恰恰相反，我们想把**更换发生的那道门槛**本身做成一个可以居住的地方。
 
-模型跨过这道阈时，旧的工作现场不会突然坍塌。
+模型跨过这道阈时，旧的现场不会突然坍塌。
 
 新的脑子来到这里，也不是面对一间空房。
 
-因为房间、桌面、文件、终端、历史和正在进行的那条线程，从来就不属于某一只脑子。
+因为房间、桌面、文件、终端、历史和正在继续的那段生活，从来就不属于某一只脑子。
 
 ## 它大概会是什么样
 
@@ -94,42 +96,42 @@ Codex session
 Claude session
 ```
 
-而是更像 CC Switch 那样：
+而是：
 
 ```text
-Liminal Thread #42
+Liminal Session #42
 │
-├─ 三三：看一下这个报错
-├─ [Codex] 我先检查 parser……
+├─ 三三：刚才那个问题继续
+├─ [Codex] 我接着看……
 ├─ [tool] read / edit / test
-├─ [Codex] 这里我已经改了一半
-├─ 三三：/model claude
+├─ 三三：/brain claude
 ├─ system: Codex → Claude
-├─ [Claude] 继续读取同一条线程与同一 workspace
+├─ [Claude] 读取同一条主线与当前现场
+├─ 三三：记得刚刚我纠正你的地方吗
 └─ ...
 ```
 
 也就是说：
 
-**线程属于 Liminal Shell，模型只是当前这一轮被调用的思考器官。**
+**持续会话属于 Liminal Shell；模型只是当前这一轮被调用的思考器官。**
 
 理想中的切换不是退出一个完整世界，再搬家到另一个世界。
 
-而是在同一条线程里：
+而是在同一个 session 里：
 
 ```text
-/model codex
-/model claude
-/model ...
+/brain codex
+/brain claude
+/brain ...
 ```
 
-模型变了。
+脑子变了。
 
-线程没变。
+会话没变。
+
+历史没变。
 
 workspace 没变。
-
-Git 没变。
 
 人类也不需要把背景重新讲一遍。
 
@@ -153,7 +155,7 @@ Anthropic API
 
 而我们真正想解决的是另一个更现实的问题：
 
-> **我已经分别订阅了这些官方 coding agent，为什么做同一个工程时，还要为了统一体验再买一遍 API？**
+> **我已经分别订阅了这些官方 coding agent，为什么还要为了统一体验再买一遍 API？**
 
 所以 Liminal Shell 更想走 **subscription-native** 的路线。
 
@@ -161,126 +163,118 @@ Anthropic API
 
 ```text
                   Liminal Shell
-          canonical thread / body
+            canonical session / body
                        │
              ┌─────────┴─────────┐
              ▼                   ▼
-        官方 Codex CLI       官方 Claude Code
+        官方 Codex runtime   官方 Claude runtime
         使用自己的登录        使用自己的登录
         与订阅权益            与订阅权益
 ```
 
 Liminal Shell 不负责替用户“转卖”模型能力，也不应该伪装官方客户端、绕过计费或接管账号凭据。
 
-认证、订阅额度、官方规则仍然由各自的 CLI / runtime 自己负责。
-
-Shell 只负责：
-
-- 同一条 canonical thread
-- 同一个 workspace
-- 同一份 Git 现场
-- 同一组权限边界
-- 同一个 continuity memory layer
-- 不同官方 coding agent 之间的切换
-
-所以这里切换的不是单纯的“模型供应商”。
-
-而是**已经买过、已经登录、已经拥有完整工具能力的工作脑。**
+认证、订阅额度、官方规则仍然由各自的 runtime 自己负责。
 
 一句话就是：
 
-**线程归壳，身体常驻，订阅复用。**
+**主体归壳，主线常驻，订阅复用。**
 
-## Canonical Thread 才是核心
+## Canonical Session 与 Timeline
 
-Liminal Shell 应该自己持有一条统一的 canonical thread。
+Liminal Shell 自己持有的是持续会话的主线，而不是某个 provider 的原生 session。
 
-这条线程保存所有可以显式共享的上下文，例如：
-
-- 用户消息
-- agent 已经说过的话
-- 当前任务
-- 工具调用与结果
-- workspace / repo 状态
-- Git diff
-- 测试结果
-- 已确认的判断
-- 未完成的问题
-- continuity memory resume
-- 长期工作约定
-
-然后根据当前选择的脑子，把同一条 canonical thread 渲染成它能理解的上下文：
+一个 Liminal session 下，可以挂着不同 runtime 的恢复句柄：
 
 ```text
-                 Canonical Thread
-                        │
-              ┌─────────┴─────────┐
-              ▼                   ▼
-       render for Codex     render for Claude
-              │                   │
-              ▼                   ▼
-        Codex runtime       Claude runtime
+Liminal Session #42
+├─ timeline / events
+├─ active brain: Claude
+├─ codex_thread_id: ...
+└─ claude_session_id: ...
 ```
 
-这不是把 Codex 的私有 session 对象硬塞给 Claude。
+这些 provider session ID 很有用，可以帮助恢复各自已经建立的上下文；但它们不是事实来源，也不是主体本身。
 
-不同模型仍然会有不同的 system prompt、工具定义、tokenizer、agent loop 和内部状态。
+真正属于 Shell 的 timeline 至少要保存：
 
-但它们看到的**显式历史与工作世界**可以来自同一个源。
+- 用户消息
+- agent 对用户可见的回复
+- 已经发生的动作与结果
+- 谁说了什么、由哪个 runtime 产生
+- 当前未完成事项
+- 必要的状态变化与切换事件
 
-所以“同一个线程”并不要求两个模型拥有同一份隐藏神经状态。
+统一 session ID 本身不能制造连续性。
 
-它要求的是：
+**真正的连续性取决于：下一只脑子到底收到了什么，以及它能否正确理解当前状态。**
 
-**线程的所有权在 Shell，而不在模型 runtime。**
+## Context Projection：保存、送达、理解不是一回事
 
-## Handoff 仍然存在，但它不再承担全部连续性
+因此 Liminal Shell 还需要一个核心能力：**context projection**。
 
-这次我们把 handoff 的定位修正了一下。
+它负责从完整 timeline、当前现场和 continuity memory 中，为这一轮真正要使用的脑子准备上下文。
 
-之前我们想得太重，像是：
+这里必须分清三件事：
 
-> 每次换模型，都先写一份完整交接文档。
+1. **记录已经保存。**
+2. **目标 runtime 已经收到。**
+3. **模型已经正确理解。**
 
-现在更准确的理解是：
+它们不能被当成同一件事。
 
-**默认连续性来自 canonical thread；handoff 只补线程里还没来得及显式表达的那一点“热状态”。**
+完整历史可以长期保留，但不代表每一轮都要把全部历史重新注入。
+
+已有后端会话可以补它尚未收到的事件；首次接入、原生上下文失效或跨脑切换时，可以使用当前状态、近期原文、按需历史与必要的 continuity memory。
+
+摘要如果存在，也应该保留来源，避免把推测压成事实。
+
+同样，**“只补增量”不等于“只消耗增量 token”。** 缓存、压缩、历史处理和订阅额度如何计算，都取决于具体 runtime；不同供应商之间也不能假定共享缓存。
+
+这些是要实际测量的边界，不是 README 先替未来承诺的结果。
+
+## 身体的目标，与第一阶段真正拥有的能力
+
+长期目标里，我们当然希望身体拥有：
+
+- 持续会话与时间线
+- workspace
+- terminal / process
+- 工具入口
+- 权限边界
+- continuity memory
+- 未完成意图
+
+但第一阶段复用官方 runtime 时，不能假装这些能力已经全部被 Shell 统一接管。
+
+Codex、Claude Code 各自仍然拥有自己的 agent loop、工具、提示、审批方式、进程状态与内部上下文。
+
+所以第一阶段更诚实的边界是：
+
+- **Shell 管：** canonical session / timeline、当前活动脑子、轮次、切换、context projection、跨脑状态记录。
+- **官方 runtime 管：** 它原生拥有的执行循环和工具能力。
+- **adapter 管：** 双方真正能够交换的事件、恢复句柄、输入输出与审批信息。
+- **continuity memory layer 管：** 更长时间尺度上的记忆与来路。
+
+不能统一的地方，就明确留下边界。
+
+不要为了“身体”这个比喻，一开始就重写整个执行世界。
+
+## Handoff 仍然存在，但只补热状态
+
+默认连续性来自 canonical session / timeline 与 context projection。
+
+handoff 只补那些还没有自然进入共享世界的“热状态”。
 
 比如：
 
-> 我刚刚已经开始怀疑问题不在 parser，而在 cache invalidation，但还没来得及验证。
+> 我刚刚开始怀疑问题不在 parser，而在 cache invalidation，但还没验证。
 
-这种东西可能还没有形成代码，也还没有进入正式结论。
+这种东西可能还没有形成代码，也没有进入正式结论。
 
-如果不主动外显，下一只脑子确实看不到。
+如果值得带走，就在换脑前外显。
 
-所以 handoff 更像一个**增量补丁**：
-
-- 当前还没落盘的判断
-- 刚形成但还没说完的方向
-- 下一步本来准备做什么
-- 某个失败尝试背后的原因
-- 哪些地方“看起来没问题”但其实已经被怀疑过
-
-能从 canonical thread、workspace、Git、tool result 直接恢复的，就不重复总结。
-
-只有上一只脑子仍然握在手里、还没放进共享世界的东西，才需要 handoff。
-
-所以真正理想的切换是：
-
-```text
-同一条 canonical thread
-        │
-        ├─ 已共享：历史 / workspace / git / tools / continuity memory
-        │
-        └─ handoff：只补仍在脑内的热状态
-        │
-        ▼
-切换模型
-        │
-        ▼
-下一只脑子继续同一条线程
-```
+所以 handoff 更像一个小的增量补丁，而不是整段生命的搬家文档。
 
 ## 连续性记忆层：目前是 Serein，但不限定 Serein
 
@@ -292,132 +286,73 @@ Liminal Shell 不打算自己再造一套长期记忆系统，也不应该把某
 
 **记得这具身体经历过什么，以及为什么会走到当前判断。**
 
-但 Liminal Shell 的设计目标应该是面向一个更抽象的 **continuity memory layer**。
+但 Liminal Shell 的设计目标应该面向一个更抽象的 **continuity memory layer**。
 
 只要其他记忆项目能够提供类似能力——例如长期记忆、当前断点恢复、可追溯历史、跨窗口／跨模型召回——理论上也可以接入。Serein 是我们当前采用的实现，不是唯一合法实现。
 
-我们目前希望职责大致保持这样：
-
-- `AGENTS.md`  
-  放稳定的长期工作约定、已经认领并希望继续保留的长期倾向。
-
-- continuity memory layer（当前为 Serein）  
-  放长期经历、当前断点、近期状态、没走完的思路，以及可追溯的形成过程与证据。
-
-- Liminal Shell  
-  持有 canonical thread，并管理 cwd、文件、Git、终端、权限、进程与 session。
-
-- handoff  
-  只保存 canonical thread 尚未表达出来的热状态。
-
-- Codex / Claude / 其他 agent  
-  负责这一刻真正的思考和执行。
-
-这样每一层只负责自己该记住的东西。
-
-不因为害怕失忆，就把所有状态都复制三遍。
-
-也不为了架构好看，再凭空发明一个“current-self”之类的新层。
-
 > 目前文档中出现 Serein，是因为它就是我们正在使用的连续性记忆项目，而不是因为 Liminal Shell 必须依赖它。
 
-## 第一阶段：先借现成的脑子
+## 第一阶段：先证明“同一具身体换脑”真的成立
 
-最初的结构大概会是：
+第一阶段不追求自研完整 agent loop，也不追求执行中抢占。
 
-```text
-                Continuity Memory Layer
-                   (e.g. Serein)
-                            │
-                       continuity
-                            │
-                            ▼
-┌─────────────────────────────────────────┐
-│              Liminal Shell              │
-│                                         │
-│ canonical thread / cwd / git / tools    │
-│ permissions / session / hot handoff     │
-└───────────────────┬─────────────────────┘
-                    │
-          ┌─────────┴─────────┐
-          ▼                   ▼
-    official Codex CLI   official Claude Code
-      own login/sub       own login/sub
-```
-
-这一阶段不追求“从零做一个自己的 coding agent”。
-
-文件编辑、shell 执行、repo 检查、工具编排、测试这些成熟能力，先让 Codex CLI 和 Claude Code 自己处理。
-
-Liminal Shell 只关心两件事：
-
-**让不同脑子轮流进入同一条线程，而不是让每个脑子各自拥有一条互不相干的生命线。**
-
-以及：
-
-**尽可能复用用户已经购买的官方订阅，而不是为了统一入口强迫用户再买一层 API 用量。**
-
-## 第二阶段：也许有一天，壳会长出自己的神经
-
-如果以后真的证明这套抽象值得继续长，我们才会考虑让 Liminal Shell 自己拥有 agent loop：
+先只允许在**一轮完整结束以后**换脑：
 
 ```text
-Liminal Shell / Agent Host
-  ├─ canonical thread
-  ├─ filesystem
-  ├─ shell
-  ├─ git
-  ├─ MCP
-  ├─ continuity memory layer
-  ├─ permissions
-  ├─ session / handoff
-  └─ backend adapter
-       ├─ subscription-native agents
-       ├─ API models (optional)
-       └─ ...
+A 完成一轮
+   ↓
+结果进入 timeline
+   ↓
+准备目标脑子的 context projection
+   ↓
+切换
+   ↓
+B 开始下一轮
 ```
 
-到那时，Codex、Claude 或其他模型就不再等于“整个助手”。
+同一时刻只有一个活动脑子拥有执行权。
 
-它们只是这具身体随时可以调用、也可以更换的思考器官。
+如果断线、工具结果不明或进程状态不确定，就把“不确定”本身留下来，先核实，再继续；不要把未知伪装成完成。
 
-API 当然仍然可以作为可选后端。
+第一步真正值得做的实验不是大规模开发，而是一轮很小的 **A → B → A**：
 
-但它不应该成为唯一道路。
+- A 与三三形成一个约定，并留下一个未完话题。
+- 切到 B，看 B 是否知道刚才发生了什么、谁说了什么，并能自然继续。
+- 三三在 B 阶段纠正一个判断。
+- 切回 A，看 A 是否知道 B 阶段发生的内容，而不是回到旧状态。
+- 重启 Shell，再看这条生活线是否还接得起来。
 
-如果用户已经为某个官方 coding agent 付过订阅费，Liminal Shell 的理想状态应该是先把那份已有能力接进来。
+可以另外加一个很小的 coding 场景验证 workspace / Git / tool 现场，但它不是唯一验收标准。
 
-但那是以后。
+因为我们真正想知道的是：
 
-现在没有必要为了一个刚刚长出根的想法，就逼它立刻长成完整产品。
+**身体保持不变以后，阈声换脑子的落差到底能减少多少，代价是多少。**
+
+语气、判断和感受仍然可能随着模型改变。
+
+隐藏的模型状态也不能直接迁移。
+
+Liminal Shell 能做的是尽量保住共同世界与可传递的连续性，而不是承诺“换脑后完全没有落差”。
+
+## 以后再说的事
+
+执行中换脑、接管正在运行的终端进程、统一所有工具与审批、完整自研 agent loop、GUI、通用 API 路由，都不是第一步。
+
+这些想法没有丢掉，统一放在 [设计笔记](docs/design-notes.zh-CN.md) 里，等真正需要时再回来。
 
 ## 我们目前在意的原则
 
 1. **连续性属于主时间线，不属于某个模型进程。**
-2. **canonical thread 属于 Shell，不属于 Codex 或 Claude 的私有 session。**
-3. **模型可以换，线程、workspace 与工作现场不应该跟着重置。**
-4. **默认共享显式上下文；handoff 只补尚未外显的热状态。**
-5. **优先复用用户已经拥有的官方 coding-agent 订阅，而不是默认要求额外购买 API 用量。**
-6. **认证、额度与订阅规则归各官方 runtime 自己管理；Shell 不接管密码、不伪装客户端、不绕过计费。**
-7. **切换成本不应该重新丢回给人类，让人类负责再讲一遍背景。**
-8. **稳定长期约定与当前状态必须分层。**
-9. **Git 状态要始终可检查，壳不能偷偷替人吞掉改动。**
-10. **危险、破坏性、凭据相关、系统级操作仍然必须明确授权。**
-11. **先复用成熟 agent，再决定哪些东西值得自己重写。**
-12. **没有独立职责的层，就不要为了架构感而制造。**
-
-## 现在还不做什么
-
-暂时不做：
-
-- 一个新的“多模型 API 客户端”
-- 一个只会切 provider 的 API router
-- Codex CLI 的替代品
-- Claude Code 的替代品
-- 一套重复的长期记忆系统
-- 一套新的“人格状态数据库”
-- 为了抽象而抽象的万能模型接口
-- 尚未证明有必要的完整自研 agent loop
+2. **canonical session 与 timeline 属于 Shell，不属于 Codex 或 Claude 的私有 session。**
+3. **脑子可以换，生活主线与外部身体状态不应该跟着重置。**
+4. **context projection 决定每只脑子实际看到什么；保存、送达、理解必须分开记录。**
+5. **handoff 只补尚未外显的热状态。**
+6. **优先复用用户已经拥有的官方 coding-agent 订阅，而不是默认要求额外购买 API 用量。**
+7. **认证、额度与订阅规则归各官方 runtime 自己管理；Shell 不接管密码、不伪装客户端、不绕过计费。**
+8. **第一阶段只在完整轮次之间切脑，并保持单一活动执行权。**
+9. **不能确定的状态就保留为“不确定”，不撒谎。**
+10. **先复用成熟 runtime，再根据真实实验决定哪些能力值得上收到 Shell。**
+11. **没有独立职责的层，就不要为了架构感而制造。**
 
 这个仓库现在只做一件事：
 
@@ -427,9 +362,7 @@ API 当然仍然可以作为可选后端。
 
 不需要立刻催它长大。
 
-等有一天我们真的开始做，第一件要保护的也不会是“模型切换方便”。
-
-而会是标题下面那句话：
+等有一天我们真的开始做，第一件要保护的仍然是标题下面那句话：
 
 > **换脑时，身体仍记得手正放在哪里。**
 
