@@ -2,6 +2,8 @@
 
 > A persistent local shell for switching coding agents without switching worlds.
 
+[中文版](README.zh-CN.md)
+
 **Status:** idea parked for later. This repository currently stores the architecture concept only; implementation has not started.
 
 ## What it is
