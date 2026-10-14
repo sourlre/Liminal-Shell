@@ -14,13 +14,7 @@ One day, Sansan asked a simpler question:
 
 > If Codex and Claude Code already exist, could we build our own shell and let both of them live inside it?
 
-At first it sounded like a convenient launcher:
-
-```text
-/codex
-/claude
-/back
-```
+At first it sounded like a convenient model switcher.
 
 But the interesting part was not convenient model selection.
 
@@ -36,19 +30,13 @@ So we arrived at a principle:
 
 **continuity should not live inside a single instance.**
 
-What remains continuous is the canonical timeline: what already happened, what judgment has just formed, what action is unfinished, and what the next instance should be able to inherit as its own ongoing state.
+What remains continuous is a canonical timeline: what already happened, what judgment has just formed, what action is unfinished, and what the next brain should inherit as its own ongoing state.
 
 Then the same answer appeared again in coding.
 
-Why should a project have to reintroduce itself because a Codex session ended and Claude Code took over?
-
-Why should a model switch require the human to explain the repository, the current task, the failed attempts, and the reason the last approach was abandoned?
-
 Sharing a directory is not enough.
 
-Two agents can share files without sharing the live working scene.
-
-The code that was changed a minute ago, the hypothesis that is still unverified, the dead end that was already explored, the next file the previous agent was about to touch—none of that becomes shared merely because the cwd is the same.
+Two agents can share files without sharing one thread.
 
 So Liminal Shell is not primarily trying to preserve the model.
 
@@ -59,15 +47,15 @@ the files,
 the terminal,  
 the Git state,  
 the permission boundary,  
-and the task that is still warm.
+and most importantly, **one canonical thread**.
 
 Codex may leave.
 
-Claude Code may take over.
+Claude may take over.
 
 Other brains may come later.
 
-But the body should not lose its memory just because the brain changed.
+But the thread should not disappear with the brain.
 
 ## Why “Liminal Shell”
 
@@ -79,88 +67,129 @@ We do not want to pretend that a model switch never happened.
 
 We want to make the threshold where it happens into a place that can be inhabited.
 
-A new agent should not enter an empty room.
-
-It should arrive somewhere that already knows where the work has reached.
+The room, the desk, the files, the terminal, the history, and the active thread never belonged to one brain in the first place.
 
 ## What it may look like
 
-The first version would not reimplement Codex CLI or Claude Code.
-
-They already have mature coding-agent loops. Liminal Shell would sit above them as the cockpit:
+The goal is closer to a model switch inside one thread than to a handoff between two independent agent sessions:
 
 ```text
-liminal
-  ├─ /codex   → start Codex in the current workspace
-  ├─ /claude  → start Claude Code in the current workspace
-  └─ /back    → return to Liminal Shell
+Liminal Thread #42
+│
+├─ Sansan: inspect this error
+├─ [Codex] I'll start with the parser...
+├─ [tool] read / edit / test
+├─ [Codex] this change is only half done
+├─ Sansan: /model claude
+├─ system: Codex → Claude
+├─ [Claude] continues with the same thread and workspace
+└─ ...
 ```
 
-They would share:
+In other words:
 
-- the same working directory and repository
-- the same Git state
-- the same long-lived working agreements
-- the same terminal and permission boundaries
-- the same Serein continuity source
-- the same current-task handoff
+**the thread belongs to Liminal Shell; the model is only the thinking organ selected for the current turn.**
 
-This is not “several models in one dropdown”.
+The ideal switch is not leaving one complete world and moving into another.
 
-A normal multi-model client asks:
+It is simply:
 
-> Which model do I want now?
+```text
+/model codex
+/model claude
+/model ...
+```
 
-Liminal Shell asks:
+The model changes.
 
-> After the model changes, how does the working self keep its hand on the same place?
+The thread does not.
 
-## A handoff is not a project summary
+The workspace does not.
 
-The important layer is not the launcher.
+Git does not.
 
-It is the handoff.
+And the human does not need to explain the background again.
 
-A cold summary such as “changed A, pending B, next C” loses too much.
+## The canonical thread is the core
 
-The handoff should preserve the still-warm working scene:
+Liminal Shell should own one canonical thread containing all explicitly shareable context:
 
-- the actual problem being solved
-- completed edits
-- failed attempts and why they were abandoned
-- unresolved judgments
-- recently touched files
-- current Git diff and repository state
-- uncommitted risks
-- the next intended action
-- recent context that still affects the current decision
-- the difference between durable agreements and temporary state
+- user messages
+- agent-visible conversation history
+- current task
+- tool calls and results
+- workspace / repository state
+- Git diff
+- test output
+- confirmed decisions
+- unresolved questions
+- Serein resume
+- durable working agreements
+
+The shell can then project that same thread into the context format each brain understands:
+
+```text
+                 Canonical Thread
+                        │
+              ┌─────────┴─────────┐
+              ▼                   ▼
+       render for Codex     render for Claude
+              │                   │
+              ▼                   ▼
+        Codex runtime       Claude runtime
+```
+
+This does not mean forcing a private Codex session object into Claude.
+
+Different models may still have different system prompts, tool definitions, tokenizers, agent loops, and hidden internal state.
+
+“Same thread” therefore does not require identical neural state.
+
+It requires **thread ownership to live in the shell rather than inside a model runtime**.
+
+## Handoff still exists, but it no longer carries all continuity
+
+We revised the role of handoff.
+
+The earlier design treated every model switch like a full shift-change document.
+
+A better model is:
+
+**canonical thread provides continuity by default; handoff only patches in hot state that has not yet been externalized.**
+
+For example:
+
+> I have started to suspect that the bug is not in the parser but in cache invalidation, but I have not verified it yet.
+
+That thought may not exist in code, Git, or a formal conclusion yet.
+
+If it is worth preserving, it needs to be externalized before the switch.
+
+So handoff becomes a small delta containing things like:
+
+- an unresolved direction
+- an intention that has not yet become an action
+- the reason a dead end was rejected
+- the next step the current brain was about to take
+- a recently formed suspicion not yet represented elsewhere
+
+Anything recoverable from the canonical thread, workspace, Git, or tool results should not be redundantly summarized.
 
 Conceptually:
 
 ```text
-current agent
-    ↓
-leave a still-warm handoff
-    ├─ current task
-    ├─ completed changes
-    ├─ unresolved judgments
-    ├─ failed attempts and reasons
-    ├─ git diff / repo state
-    └─ intended next action
-    ↓
-exit
-    ↓
-next agent enters the same shell
-    ↓
-load the same workspace + Serein resume + handoff
-    ↓
-continue from here
+one canonical thread
+        │
+        ├─ shared: history / workspace / git / tools / Serein
+        │
+        └─ handoff: only still-private hot state
+        │
+        ▼
+switch model
+        │
+        ▼
+next brain continues the same thread
 ```
-
-Not “one employee leaves a status report for another”.
-
-More like one body changing brains while its hand remains where it was.
 
 ## Where Serein fits
 
@@ -173,35 +202,37 @@ Serein owns a deeper responsibility:
 The intended split is roughly:
 
 - `AGENTS.md` — durable working agreements and long-lived self-state
-- Serein `resume` — the current breakpoint, recent state, unfinished thought
+- Serein `resume` — current breakpoint, recent state, unfinished thought
 - Serein Scene / Diary / Event — longer history, formation, and evidence
-- Liminal Shell — cwd, files, Git, terminal, permissions, process/session state, and the current handoff
-- Codex / Claude Code / other agents — the brain doing the thinking and execution right now
+- Liminal Shell — canonical thread, cwd, files, Git, terminal, permissions, process/session state
+- handoff — only hot state not yet represented in the canonical thread
+- Codex / Claude / other agents — the brain doing the thinking and execution right now
 
 Each layer should remember only what it genuinely owns.
 
 ## Phase 1 — borrow existing brains
 
 ```text
-                 Serein
-                   │
-              continuity
-                   │
-                   ▼
-┌────────────────────────────┐
-│        Liminal Shell       │
-│ session / tools / cwd      │
-│ git / permissions / handoff│
-└─────────────┬──────────────┘
-              │
-        ┌─────┴─────┐
-        ▼           ▼
-    Codex CLI    Claude Code
+                         Serein
+                            │
+                       continuity
+                            │
+                            ▼
+┌─────────────────────────────────────────┐
+│              Liminal Shell              │
+│                                         │
+│  canonical thread / cwd / git / tools   │
+│  permissions / session / hot handoff    │
+└───────────────────┬─────────────────────┘
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+      Codex CLI          Claude Code
 ```
 
 The point of this phase is not to build a new coding agent from scratch.
 
-The point is to protect continuity when one capable agent leaves and another enters.
+It is to let different brains take turns inside the same thread instead of giving every agent runtime its own unrelated life.
 
 ## Phase 2 — maybe the shell grows its own nervous system
 
@@ -209,6 +240,7 @@ If this abstraction proves worth growing, Liminal Shell could eventually own its
 
 ```text
 Liminal Shell / Agent Host
+  ├─ canonical thread
   ├─ filesystem
   ├─ shell
   ├─ git
@@ -233,14 +265,15 @@ This repository exists now simply to keep the idea safe until it is ready to gro
 ## Principles we currently care about
 
 1. **Continuity belongs to the canonical timeline, not to a model process.**
-2. **The model may change; the working body should not reset with it.**
-3. **A handoff should preserve the scene, not merely summarize the result.**
-4. **The human should not have to pay the context-reconstruction cost after every switch.**
-5. **Durable agreements and current state should stay in different layers.**
-6. **Git state must remain inspectable.**
-7. **Dangerous, destructive, credential-related, or system-level actions remain permission-gated.**
-8. **Reuse mature agents before deciding what is worth rebuilding.**
-9. **Do not create an architectural layer unless it owns a genuinely distinct responsibility.**
+2. **The canonical thread belongs to the shell, not to a private Codex or Claude session.**
+3. **The model may change; the thread, workspace, and working scene should not reset with it.**
+4. **Explicit context is shared by default; handoff only patches in hot state that has not yet been externalized.**
+5. **The human should not have to pay the context-reconstruction cost after every switch.**
+6. **Durable agreements and current state should stay in different layers.**
+7. **Git state must remain inspectable.**
+8. **Dangerous, destructive, credential-related, or system-level actions remain permission-gated.**
+9. **Reuse mature agents before deciding what is worth rebuilding.**
+10. **Do not create an architectural layer unless it owns a genuinely distinct responsibility.**
 
 ## Not yet
 
