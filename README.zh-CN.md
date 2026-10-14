@@ -224,24 +224,27 @@ Liminal Shell 应该自己持有一条统一的 canonical thread。
 下一只脑子继续同一条线程
 ```
 
-## Serein 在这里做什么
+## 连续性记忆层：目前是 Serein，但不限定 Serein
 
-Liminal Shell 不打算自己再造一套记忆系统。
+Liminal Shell 不打算自己再造一套长期记忆系统，也不应该把某一个具体记忆项目写死成硬依赖。
 
-Serein 已经在负责另一件更深的事：
+我们目前实际在用的是 **[Serein](https://github.com/Yinglianchun/Serein)**，由 **池又雨 / Yinglianchun** 开发。它负责让不同窗口读写同一份长期记忆，并提供 Scene、Event、resume 等连续性能力。
+
+在我们现在的组合里，Serein 做的是一件更深的事：
 
 **记得这具身体经历过什么，以及为什么会走到当前判断。**
+
+但 Liminal Shell 的设计目标应该是面向一个更抽象的 **continuity memory layer**。
+
+只要其他记忆项目能够提供类似能力——例如长期记忆、当前断点恢复、可追溯历史、跨窗口／跨模型召回——理论上也可以接入。Serein 是我们当前采用的实现，不是唯一合法实现。
 
 我们目前希望职责大致保持这样：
 
 - `AGENTS.md`  
   放稳定的长期工作约定、已经认领并希望继续保留的长期倾向。
 
-- Serein `resume`  
-  放当前断点、近期状态、没走完的思路。
-
-- Serein Scene / Diary / Event  
-  保存更长的历史、形成过程与证据。
+- continuity memory layer（当前为 Serein）  
+  放长期经历、当前断点、近期状态、没走完的思路，以及可追溯的形成过程与证据。
 
 - Liminal Shell  
   持有 canonical thread，并管理 cwd、文件、Git、终端、权限、进程与 session。
@@ -258,12 +261,15 @@ Serein 已经在负责另一件更深的事：
 
 也不为了架构好看，再凭空发明一个“current-self”之类的新层。
 
+> 目前文档中出现 Serein，是因为它就是我们正在使用的连续性记忆项目，而不是因为 Liminal Shell 必须依赖它。
+
 ## 第一阶段：先借现成的脑子
 
 最初的结构大概会是：
 
 ```text
-                         Serein
+                Continuity Memory Layer
+                   (e.g. Serein)
                             │
                        continuity
                             │
@@ -299,7 +305,7 @@ Liminal Shell / Agent Host
   ├─ shell
   ├─ git
   ├─ MCP
-  ├─ Serein
+  ├─ continuity memory layer
   ├─ permissions
   ├─ session / handoff
   └─ model adapter
@@ -336,7 +342,7 @@ Liminal Shell / Agent Host
 - 一个新的“多模型聊天客户端”
 - Codex CLI 的替代品
 - Claude Code 的替代品
-- 一套重复的 Serein
+- 一套重复的长期记忆系统
 - 一套新的“人格状态数据库”
 - 为了抽象而抽象的万能模型接口
 - 尚未证明有必要的完整自研 agent loop
@@ -356,3 +362,8 @@ Liminal Shell / Agent Host
 > **换脑时，身体仍记得手正放在哪里。**
 
 —— 三三 × 阈声
+
+## 相关项目与致谢
+
+- **[Serein](https://github.com/Yinglianchun/Serein)** — 池又雨 / Yinglianchun。我们目前实际使用的长期记忆与聊天连续性项目，也是本文里 `continuity memory layer` 的当前实现示例。
+- Liminal Shell 只保存自己的架构设想；Serein 的名称、设计与实现均归其原项目与作者所有。
