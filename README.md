@@ -36,16 +36,15 @@ Sharing a directory is not enough.
 
 Two agents can share files without sharing one continuous life.
 
-So Liminal Shell is not primarily trying to preserve the model.
+So Liminal Shell is not primarily trying to preserve one model.
 
-It is trying to preserve the **body**:
+It is trying to preserve **continuity itself**:
 
-the workspace,  
-the files,  
-the terminal,  
-the Git state,  
-the permission boundary,  
-and most importantly, **one canonical session with a continuously growing timeline**.
+one canonical session with a continuously growing timeline;  
+the past that already happened;  
+judgments and corrections that have just formed;  
+unfinished intentions;  
+and visible shared state such as the workspace and Git history.
 
 Codex may leave.
 
@@ -53,7 +52,9 @@ Claude may take over.
 
 Other brains may come later.
 
-But the main line should not disappear with the brain.
+But the past should not disappear with the brain, and the things already at hand should not reset.
+
+We still use **body** as the project's poetic metaphor. Technically, Phase 1 is closer to a **continuity substrate** or **shared world**: the layer that lets a new brain enter the same past and present.
 
 ## Why “Liminal Shell”
 
@@ -111,7 +112,7 @@ If the only goal were switching between OpenAI API, Anthropic API, and other pro
 
 Liminal Shell asks a different question:
 
-> **If I already pay for multiple official coding-agent subscriptions, why should I buy the same capability again through API usage just to get one unified body?**
+> **If I already pay for multiple official coding-agent subscriptions, why should I buy the same capability again through API usage just to get one unified continuity layer?**
 
 So the preferred direction is **subscription-native**.
 
@@ -172,9 +173,15 @@ Summaries should retain provenance so inference does not silently become fact.
 
 Likewise, **sending only a delta does not imply paying only for delta tokens**. Cache behavior, compaction, history processing, and subscription usage are runtime-specific and must be measured rather than promised.
 
-## The body's goal vs. what Phase 1 actually owns
+## “Body” is the metaphor; Phase 1 starts as a continuity substrate
 
-Long-term, the body may own session history, workspace, terminal/process state, tools, permissions, continuity memory, and unfinished intentions.
+We keep the word **body** because it captures what we want to protect: after a brain switch, the past is still there and the things at hand have not reset.
+
+But in Phase 1, that is not yet a literal technical fact.
+
+A more precise description is **continuity substrate**: a layer that preserves the shared timeline, current state, visible scene, and unfinished intentions, then projects them to the newly selected brain.
+
+Long-term, this substrate may grow to own more of what would make the metaphor literally true: session history, workspace, terminal/process state, tools, permissions, continuity memory, and unfinished intentions.
 
 But when Phase 1 reuses official runtimes, Liminal Shell should not pretend it already controls all of those things.
 
@@ -211,7 +218,7 @@ But Liminal Shell should target a more abstract **continuity memory layer**. Oth
 
 Serein is our current implementation, not the only valid one.
 
-## Phase 1 — first prove that one body can really change brains
+## Phase 1 — first prove that the past and present survive a brain switch
 
 Phase 1 does not need a custom agent loop or mid-turn takeover.
 
@@ -245,11 +252,17 @@ A small coding scenario can separately test workspace/Git/tool continuity, but t
 
 The real question is:
 
-**once the body stays, how much does the experience gap between brains shrink, and at what cost?**
+**once the continuity substrate stays, how much does the experience gap between brains shrink, and at what cost?**
 
 Tone, judgment, and felt continuity may still change with the model. Hidden model state cannot be migrated directly.
 
 Liminal Shell aims to preserve the shared world and transferable continuity, not promise zero difference after a brain switch.
+
+A more precise companion to the project's metaphor is:
+
+> **When the brain changes, it still knows where it came from and where its hand is now.**
+
+“Where it came from” means memory, judgment, and correction; “where its hand is” means the current scene and unfinished action.
 
 ## Later
 
@@ -261,7 +274,7 @@ Those ideas are preserved in the [Chinese design notes](docs/design-notes.zh-CN.
 
 1. **Continuity belongs to the canonical timeline, not to a model process.**
 2. **The canonical session and timeline belong to the Shell, not to a private Codex or Claude session.**
-3. **Brains may change; the life line and external body state should not reset with them.**
+3. **Brains may change; the life line and shared world should not reset with them.**
 4. **Context projection determines what each brain actually sees; stored, delivered, and understood must remain distinct.**
 5. **Handoff only patches in hot state that has not yet been externalized.**
 6. **Prefer reusing official coding-agent subscriptions the user already has instead of requiring additional API usage by default.**
