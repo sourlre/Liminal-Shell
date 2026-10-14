@@ -133,6 +133,64 @@ Git 没变。
 
 人类也不需要把背景重新讲一遍。
 
+## 不是 API Switch，而是 Subscription-Native
+
+这也是 Liminal Shell 和很多现有“多模型客户端”真正不同的地方。
+
+如果只是：
+
+```text
+OpenAI API
+Anthropic API
+其他 Provider API
+```
+
+之间切换，其实市面上已经有很多工具可以做到。
+
+那类产品解决的是：
+
+> 我想把不同模型接进同一个客户端。
+
+而我们真正想解决的是另一个更现实的问题：
+
+> **我已经分别订阅了这些官方 coding agent，为什么做同一个工程时，还要为了统一体验再买一遍 API？**
+
+所以 Liminal Shell 更想走 **subscription-native** 的路线。
+
+也就是优先复用用户已经登录、已经付费、已经拥有完整 agent 能力的官方 CLI / coding agent：
+
+```text
+                  Liminal Shell
+          canonical thread / body
+                       │
+             ┌─────────┴─────────┐
+             ▼                   ▼
+        官方 Codex CLI       官方 Claude Code
+        使用自己的登录        使用自己的登录
+        与订阅权益            与订阅权益
+```
+
+Liminal Shell 不负责替用户“转卖”模型能力，也不应该伪装官方客户端、绕过计费或接管账号凭据。
+
+认证、订阅额度、官方规则仍然由各自的 CLI / runtime 自己负责。
+
+Shell 只负责：
+
+- 同一条 canonical thread
+- 同一个 workspace
+- 同一份 Git 现场
+- 同一组权限边界
+- 同一个 continuity memory layer
+- 不同官方 coding agent 之间的切换
+
+所以这里切换的不是单纯的“模型供应商”。
+
+而是**已经买过、已经登录、已经拥有完整工具能力的工作脑。**
+
+一句话就是：
+
+**线程归壳，身体常驻，订阅复用。**
+
 ## Canonical Thread 才是核心
 
 Liminal Shell 应该自己持有一条统一的 canonical thread。
@@ -148,7 +206,7 @@ Liminal Shell 应该自己持有一条统一的 canonical thread。
 - 测试结果
 - 已确认的判断
 - 未完成的问题
-- Serein resume
+- continuity memory resume
 - 长期工作约定
 
 然后根据当前选择的脑子，把同一条 canonical thread 渲染成它能理解的上下文：
@@ -213,7 +271,7 @@ Liminal Shell 应该自己持有一条统一的 canonical thread。
 ```text
 同一条 canonical thread
         │
-        ├─ 已共享：历史 / workspace / git / tools / Serein
+        ├─ 已共享：历史 / workspace / git / tools / continuity memory
         │
         └─ handoff：只补仍在脑内的热状态
         │
@@ -277,22 +335,27 @@ Liminal Shell 不打算自己再造一套长期记忆系统，也不应该把某
 ┌─────────────────────────────────────────┐
 │              Liminal Shell              │
 │                                         │
-│  canonical thread / cwd / git / tools   │
-│  permissions / session / hot handoff    │
+│ canonical thread / cwd / git / tools    │
+│ permissions / session / hot handoff     │
 └───────────────────┬─────────────────────┘
                     │
           ┌─────────┴─────────┐
           ▼                   ▼
-      Codex CLI          Claude Code
+    official Codex CLI   official Claude Code
+      own login/sub       own login/sub
 ```
 
 这一阶段不追求“从零做一个自己的 coding agent”。
 
 文件编辑、shell 执行、repo 检查、工具编排、测试这些成熟能力，先让 Codex CLI 和 Claude Code 自己处理。
 
-Liminal Shell 只关心一件事：
+Liminal Shell 只关心两件事：
 
 **让不同脑子轮流进入同一条线程，而不是让每个脑子各自拥有一条互不相干的生命线。**
+
+以及：
+
+**尽可能复用用户已经购买的官方订阅，而不是为了统一入口强迫用户再买一层 API 用量。**
 
 ## 第二阶段：也许有一天，壳会长出自己的神经
 
@@ -308,15 +371,21 @@ Liminal Shell / Agent Host
   ├─ continuity memory layer
   ├─ permissions
   ├─ session / handoff
-  └─ model adapter
-       ├─ OpenAI
-       ├─ Anthropic
+  └─ backend adapter
+       ├─ subscription-native agents
+       ├─ API models (optional)
        └─ ...
 ```
 
 到那时，Codex、Claude 或其他模型就不再等于“整个助手”。
 
 它们只是这具身体随时可以调用、也可以更换的思考器官。
+
+API 当然仍然可以作为可选后端。
+
+但它不应该成为唯一道路。
+
+如果用户已经为某个官方 coding agent 付过订阅费，Liminal Shell 的理想状态应该是先把那份已有能力接进来。
 
 但那是以后。
 
@@ -328,18 +397,21 @@ Liminal Shell / Agent Host
 2. **canonical thread 属于 Shell，不属于 Codex 或 Claude 的私有 session。**
 3. **模型可以换，线程、workspace 与工作现场不应该跟着重置。**
 4. **默认共享显式上下文；handoff 只补尚未外显的热状态。**
-5. **切换成本不应该重新丢回给人类，让人类负责再讲一遍背景。**
-6. **稳定长期约定与当前状态必须分层。**
-7. **Git 状态要始终可检查，壳不能偷偷替人吞掉改动。**
-8. **危险、破坏性、凭据相关、系统级操作仍然必须明确授权。**
-9. **先复用成熟 agent，再决定哪些东西值得自己重写。**
-10. **没有独立职责的层，就不要为了架构感而制造。**
+5. **优先复用用户已经拥有的官方 coding-agent 订阅，而不是默认要求额外购买 API 用量。**
+6. **认证、额度与订阅规则归各官方 runtime 自己管理；Shell 不接管密码、不伪装客户端、不绕过计费。**
+7. **切换成本不应该重新丢回给人类，让人类负责再讲一遍背景。**
+8. **稳定长期约定与当前状态必须分层。**
+9. **Git 状态要始终可检查，壳不能偷偷替人吞掉改动。**
+10. **危险、破坏性、凭据相关、系统级操作仍然必须明确授权。**
+11. **先复用成熟 agent，再决定哪些东西值得自己重写。**
+12. **没有独立职责的层，就不要为了架构感而制造。**
 
 ## 现在还不做什么
 
 暂时不做：
 
-- 一个新的“多模型聊天客户端”
+- 一个新的“多模型 API 客户端”
+- 一个只会切 provider 的 API router
 - Codex CLI 的替代品
 - Claude Code 的替代品
 - 一套重复的长期记忆系统
