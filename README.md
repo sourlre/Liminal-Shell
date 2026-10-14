@@ -110,6 +110,63 @@ Git does not.
 
 And the human does not need to explain the background again.
 
+## Not an API switch — subscription-native instead
+
+This is also where Liminal Shell differs from many existing multi-model clients.
+
+If the only goal were switching between:
+
+```text
+OpenAI API
+Anthropic API
+other provider APIs
+```
+
+there are already many tools that can do that.
+
+Those products answer:
+
+> How do I put multiple model providers behind one client?
+
+Liminal Shell is trying to answer a more practical question:
+
+> **If I already pay for multiple official coding-agent subscriptions, why should I buy the same capability again through API usage just to get one unified workspace?**
+
+So the preferred direction is **subscription-native**.
+
+Instead of treating every provider as an API endpoint, Liminal Shell should first try to reuse official coding agents that the user has already installed, authenticated, and paid for:
+
+```text
+                  Liminal Shell
+          canonical thread / body
+                       │
+             ┌─────────┴─────────┐
+             ▼                   ▼
+       official Codex CLI   official Claude Code
+          own login/sub        own login/sub
+```
+
+Liminal Shell should not resell model access, impersonate official clients, bypass billing, or take over user credentials.
+
+Authentication, subscription quotas, and provider-specific rules remain the responsibility of each official CLI/runtime.
+
+The shell owns only:
+
+- the canonical thread
+- the workspace
+- Git and terminal state
+- permission boundaries
+- the continuity memory layer
+- switching between already-authorized coding agents
+
+So the thing being switched is not merely a model provider.
+
+It is a **working brain with its own paid subscription, login, tools, and runtime**.
+
+In short:
+
+**Thread-owned. Workspace-persistent. Subscription-native.**
+
 ## The canonical thread is the core
 
 Liminal Shell should own one canonical thread containing all explicitly shareable context:
@@ -123,7 +180,7 @@ Liminal Shell should own one canonical thread containing all explicitly shareabl
 - test output
 - confirmed decisions
 - unresolved questions
-- Serein resume
+- continuity-memory resume
 - durable working agreements
 
 The shell can then project that same thread into the context format each brain understands:
@@ -180,7 +237,7 @@ Conceptually:
 ```text
 one canonical thread
         │
-        ├─ shared: history / workspace / git / tools / Serein
+        ├─ shared: history / workspace / git / tools / continuity memory
         │
         └─ handoff: only still-private hot state
         │
@@ -229,18 +286,21 @@ Each layer should remember only what it genuinely owns.
 ┌─────────────────────────────────────────┐
 │              Liminal Shell              │
 │                                         │
-│  canonical thread / cwd / git / tools   │
-│  permissions / session / hot handoff    │
+│ canonical thread / cwd / git / tools    │
+│ permissions / session / hot handoff     │
 └───────────────────┬─────────────────────┘
                     │
           ┌─────────┴─────────┐
           ▼                   ▼
-      Codex CLI          Claude Code
+   official Codex CLI   official Claude Code
+      own login/sub        own login/sub
 ```
 
 The point of this phase is not to build a new coding agent from scratch.
 
 It is to let different brains take turns inside the same thread instead of giving every agent runtime its own unrelated life.
+
+And it should reuse subscriptions the user already pays for whenever possible, rather than requiring another layer of API usage just to obtain a unified shell.
 
 ## Phase 2 — maybe the shell grows its own nervous system
 
@@ -256,15 +316,19 @@ Liminal Shell / Agent Host
   ├─ continuity memory layer
   ├─ permissions
   ├─ session / handoff
-  └─ model adapter
-       ├─ OpenAI
-       ├─ Anthropic
+  └─ backend adapter
+       ├─ subscription-native agents
+       ├─ API models (optional)
        └─ ...
 ```
 
 At that point Codex, Claude, or another model would no longer be the whole assistant.
 
 They would be replaceable thinking organs inside the same working body.
+
+APIs can still exist as optional backends.
+
+They just should not be the only path.
 
 But that is later.
 
@@ -276,18 +340,21 @@ This repository exists now simply to keep the idea safe until it is ready to gro
 2. **The canonical thread belongs to the shell, not to a private Codex or Claude session.**
 3. **The model may change; the thread, workspace, and working scene should not reset with it.**
 4. **Explicit context is shared by default; handoff only patches in hot state that has not yet been externalized.**
-5. **The human should not have to pay the context-reconstruction cost after every switch.**
-6. **Durable agreements and current state should stay in different layers.**
-7. **Git state must remain inspectable.**
-8. **Dangerous, destructive, credential-related, or system-level actions remain permission-gated.**
-9. **Reuse mature agents before deciding what is worth rebuilding.**
-10. **Do not create an architectural layer unless it owns a genuinely distinct responsibility.**
+5. **Prefer reusing official coding-agent subscriptions the user already has instead of requiring additional API usage by default.**
+6. **Authentication, quotas, and provider rules remain with the official runtime; the shell does not capture passwords, impersonate clients, or bypass billing.**
+7. **The human should not have to pay the context-reconstruction cost after every switch.**
+8. **Durable agreements and current state should stay in different layers.**
+9. **Git state must remain inspectable.**
+10. **Dangerous, destructive, credential-related, or system-level actions remain permission-gated.**
+11. **Reuse mature agents before deciding what is worth rebuilding.**
+12. **Do not create an architectural layer unless it owns a genuinely distinct responsibility.**
 
 ## Not yet
 
 For now, this is not trying to become:
 
-- another multi-model chat client
+- another multi-model API client
+- a provider-only API router
 - a replacement for Codex CLI
 - a replacement for Claude Code
 - a duplicate long-term memory system
