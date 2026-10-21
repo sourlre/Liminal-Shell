@@ -30,6 +30,10 @@ ordering within a session, independent of clock changes.
 - User message and turn start commit before execution. Assistant replies and
   completion commit atomically. SQL triggers reject updates and deletes.
 - Atomic turn reservation prevents concurrent sends to the same session.
+- Both login preflight and generation run in a fresh empty temporary cwd, outside
+  the caller repository. The directory is removed afterward. Caller workspace
+  files, project instructions and project config are not the runtime working root.
+  This is context isolation, not an additional filesystem security sandbox.
 - Official `codex exec --json --ephemeral --sandbox read-only`, using the existing
   official ChatGPT login. Shell never opens credential files or accepts an API key.
   API-key environment variables are removed from the child environment, the official
@@ -56,6 +60,16 @@ The stored projection range means context was prepared, not that it was understo
 Full-history projection is intentionally small-session only; context overflow is
 an error, never silent truncation.
 
+Missing CLI, neutral-directory creation failure, and failed/unavailable official
+login checks produce `turn.preflight_failed`: generation was never invoked. The
+user message remains in the append-only audit, but is excluded from later context
+projection. Fix the preflight issue, then explicitly send the message again using
+the same UUID; restart does not block that new send. There is no automatic retry.
+
+Once generation is invoked, errors are conservatively uncertain, including
+subprocess transport errors: the buffered runner cannot prove whether execution
+already began. A nonzero exec exit alone does not prove a preflight failure.
+
 If a turn crashes, is interrupted, exits unsuccessfully, or yields an unrecognized
 protocol, its outcome remains unresolved (`turn.started` or `turn.uncertain`).
 Further sends to that session are blocked, including after restart. Inspect `show`
@@ -72,9 +86,27 @@ python -m unittest -v
 Tests use an isolated local database and simulated runtime responses. They cover
 restart persistence, CLI processes, event order, session isolation, append-only
 guards, competing sends, authentication/protocol errors, and an actual subprocess
-crash after a durable turn start. They do not consume subscription quota.
+crash after a durable turn start. They also verify neutral cwd/cleanup, preflight
+retry after restart, failed-message exclusion and conservative transport handling.
+They do not consume subscription quota. GitHub Actions runs the suite on Windows
+and Linux with Python 3.11 and 3.14; CI never authenticates or calls Codex.
 
-For a real-runtime check, run the two `send` commands above in separate processes
+For a local real-runtime check after checking out the PR branch:
+
+```powershell
+$env:PYTHONIOENCODING = "utf-8"
+$session = python liminal.py --db ./smoke.sqlite3 new
+python liminal.py --db ./smoke.sqlite3 send $session "Remember cobalt-731. Reply only ACK. Do not use tools."
+# Save the UUID; close the terminal, open another, and restore it:
+$session = "<saved-liminal-uuid>"
+python liminal.py --db ./smoke.sqlite3 send $session "What token did I ask you to remember? Do not use tools."
+python liminal.py --db ./smoke.sqlite3 show $session
+```
+
+Use the same absolute database path (or return to the same directory) in both
+terminals. Expect `cobalt-731` in the second reply.
+
+Run the two `send` commands in separate processes
 and inspect `show`: expect one Liminal UUID, two different native thread IDs,
 ordered replies, and two `turn.completed` events. This tests supplied-context
 continuation, not migration of hidden runtime state.

@@ -7,7 +7,7 @@ from uuid import uuid4
 import unittest
 from unittest.mock import patch
 
-from liminal import Store, codex
+from liminal import Store, codex, PreflightFailure
 
 
 def reply(events):
@@ -93,6 +93,20 @@ class TimelineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Unresolved'):
             self.store.send(session, 'retry', reply)
 
+    def test_preflight_failure_survives_restart_and_allows_new_send(self):
+        def unavailable(events):
+            raise PreflightFailure('not logged in')
+
+        with self.assertRaises(PreflightFailure):
+            self.store.send(self.session, 'not delivered', unavailable)
+        original = self.store.events(self.session)
+        self.assertEqual(original[-1]['kind'], 'turn.preflight_failed')
+        self.store.close()
+        self.store = Store(self.path)
+        self.store.send(self.session, 'try now', reply)
+        self.assertEqual(self.store.events(self.session)[:len(original)], original)
+        self.assertEqual(self.store.events(self.session)[-1]['kind'], 'turn.completed')
+
     def test_cli_new_and_show_across_processes(self):
         command = [sys.executable, 'liminal.py', '--db', str(self.path)]
         created = subprocess.check_output(command + ['new'], text=True).strip()
@@ -121,6 +135,43 @@ class AdapterTests(unittest.TestCase):
         self.assertNotIn('CODEX_API_KEY', kwargs['env'])
         self.assertNotIn('OPENAI_API_KEY', kwargs['env'])
         self.assertIn('forced_login_method="chatgpt"', args[0])
+        cwd = kwargs['cwd']
+        self.assertNotEqual(cwd, Path.cwd())
+        self.assertEqual(cwd, run.call_args_list[0].kwargs['cwd'])
+        self.assertFalse(cwd.exists())
+
+    @patch('liminal.shutil.which', return_value='codex')
+    @patch('liminal.subprocess.run')
+    def test_neutral_directory_empty_and_failed_inputs_not_replayed(self, run, which):
+        rows = [dict(type='thread.started', thread_id='native'),
+                dict(type='item.completed', item=dict(type='agent_message', text='hi')),
+                dict(type='turn.completed')]
+
+        def child(command, **kwargs):
+            self.assertEqual(list(kwargs['cwd'].iterdir()), [])
+            if 'login' in command:
+                return subprocess.CompletedProcess([], 0, '', 'Logged in using ChatGPT')
+            self.assertNotIn('not delivered', kwargs['input'])
+            self.assertIn('new message', kwargs['input'])
+            return subprocess.CompletedProcess([], 0, '\n'.join(map(json.dumps, rows)), '')
+
+        run.side_effect = child
+        codex([dict(seq=1, kind='user.message', turn='old', speaker='user', text='not delivered'),
+               dict(kind='turn.preflight_failed', turn='old'),
+               dict(seq=3, kind='user.message', turn='new', speaker='user', text='new message')])
+
+    @patch('liminal.shutil.which', return_value=None)
+    def test_missing_executable_is_preflight(self, which):
+        with self.assertRaises(PreflightFailure):
+            codex([])
+
+    @patch('liminal.shutil.which', return_value='codex')
+    @patch('liminal.subprocess.run')
+    def test_exec_transport_exception_is_not_preflight(self, run, which):
+        run.side_effect = [subprocess.CompletedProcess([], 0, '', 'Logged in using ChatGPT'),
+                           OSError('pipe failure after possible launch')]
+        with self.assertRaises(OSError):
+            codex([])
 
     @patch('liminal.shutil.which', return_value='codex')
     @patch('liminal.subprocess.run')

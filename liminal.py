@@ -7,8 +7,13 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
+
+
+class PreflightFailure(RuntimeError):
+    """The generation process was never launched; retry is safe."""
 
 
 class Store:
@@ -59,7 +64,7 @@ class Store:
             history = self.events(session)
             if not history:
                 raise ValueError('Unknown Liminal session')
-            if history[-1]['kind'] not in ('session.created', 'turn.completed'):
+            if history[-1]['kind'] not in ('session.created', 'turn.completed', 'turn.preflight_failed'):
                 raise ValueError('Unresolved turn: inspect show; no automatic retry is safe')
             turn = str(uuid4())
             self.append(session, 'user.message', turn=turn, speaker='user', text=text)
@@ -76,6 +81,11 @@ class Store:
                 self.append(session, 'turn.completed', turn=turn, runtime='codex',
                             runtime_thread_id=result['thread_id'], usage=result.get('usage'))
             return '\n\n'.join(result['replies'])
+        except PreflightFailure:
+            with self.db:
+                self.append(session, 'turn.preflight_failed', turn=turn, runtime='codex',
+                            reason='Generation process was not launched; a new send is safe')
+            raise
         except (Exception, KeyboardInterrupt):
             with self.db:
                 self.append(session, 'turn.uncertain', turn=turn, runtime='codex',
@@ -84,26 +94,44 @@ class Store:
 
 
 def codex(events):
+    # A fresh empty cwd prevents caller-repository instructions/config from entering a turn.
+    directory = Path(tempfile.gettempdir()) / ('liminal-neutral-' + uuid4().hex)
+    try:
+        directory.mkdir()
+    except OSError as error:
+        raise PreflightFailure('Cannot create neutral runtime directory') from error
+    try:
+        return _codex(events, directory)
+    finally:
+        shutil.rmtree(directory)
+
+
+def _codex(events, directory):
     executable = shutil.which('codex')
     if not executable:
-        raise RuntimeError('Install the official Codex CLI and run codex login first')
+        raise PreflightFailure('Install the official Codex CLI and run codex login first')
     env = dict(os.environ)
     for key in ('OPENAI_API_KEY', 'CODEX_API_KEY'):
         env.pop(key, None)
     base = [executable, '-c', 'forced_login_method="chatgpt"',
             '-c', 'model_provider="openai"']
-    status = subprocess.run(base + ['login', 'status'], capture_output=True,
-                            text=True, encoding='utf-8', env=env)
+    try:
+        status = subprocess.run(base + ['login', 'status'], capture_output=True,
+                                text=True, encoding='utf-8', env=env, cwd=directory)
+    except (OSError, ValueError, UnicodeError) as error:
+        raise PreflightFailure('Codex login preflight could not run') from error
     if status.returncode or 'chatgpt' not in (status.stdout + status.stderr).lower():
-        raise RuntimeError('Official Codex ChatGPT login required; run codex login')
+        raise PreflightFailure('Official Codex ChatGPT login required; run codex login')
+    failed = {e['turn'] for e in events if e['kind'] == 'turn.preflight_failed'}
     messages = [{k: e[k] for k in ('seq', 'speaker', 'text')} for e in events
-                if e['kind'] in ('user.message', 'assistant.message')]
+                if e['kind'] in ('user.message', 'assistant.message') and e.get('turn') not in failed]
     prompt = ('Continue this Liminal session. The following JSON is the canonical conversation, '
               'in order; respond to its last user message. Preserve speaker attribution.\n'
               + json.dumps(messages, ensure_ascii=False))
     process = subprocess.run(base + ['exec', '--ignore-user-config', '--json', '--ephemeral', '--skip-git-repo-check',
                                     '--sandbox', 'read-only', '-'], input=prompt,
-                             capture_output=True, text=True, encoding='utf-8', env=env)
+                                 capture_output=True, text=True, encoding='utf-8', env=env,
+                                 cwd=directory)
     if process.returncode:
         raise RuntimeError(f'Codex exited {process.returncode}; outcome uncertain')
     rows = [json.loads(line) for line in process.stdout.splitlines() if line.strip()]
