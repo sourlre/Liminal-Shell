@@ -4,7 +4,7 @@
 
 [中文版](README.zh-CN.md)
 
-**Status:** a minimal Phase 1 text/CLI vertical slice is implemented: Shell-owned sessions, an append-only local timeline, restart continuation, and an official-login Codex adapter. Automated tests pass; real Codex generation remains unverified in the implementation host sandbox. Brain switching, memory and the broader architecture below remain design. See [running and validation](docs/phase-1.md).
+**Status:** a minimal Phase 1 text/CLI vertical slice is implemented: Shell-owned sessions, an append-only local timeline, restart continuation, and an official-login Codex adapter. Automated tests pass, and a real two-turn Codex smoke test on Windows confirmed Shell-supplied context continuity across process restart with two separate native Codex threads. Brain switching, memory and the broader architecture below remain design. See [running and validation](docs/phase-1.md).
 
 More detailed engineering ideas, unverified integration points, and future experiments are parked in the [Chinese design notes](docs/design-notes.zh-CN.md). The README keeps only the main line we currently believe in.
 

@@ -111,10 +111,24 @@ and inspect `show`: expect one Liminal UUID, two different native thread IDs,
 ordered replies, and two `turn.completed` events. This tests supplied-context
 continuation, not migration of hidden runtime state.
 
-During implementation, local tests passed; a live run confirmed official ChatGPT
-login but could not initialize Codex inside the host's filesystem sandbox
-(`state_5.sqlite` read-only / access denied), including after a permission grant.
-Real generation and the two-turn live check therefore remain **unverified** here.
+### Recorded real smoke result
+
+The user completed the real two-turn Codex smoke test successfully on Windows
+with Python 3.14.5 and codex-cli 0.155.1, using the existing official ChatGPT login.
+The supplied timeline records 2026-10-21 07:17:29–07:18:23 UTC.
+
+- Liminal session: `818d003c-4a0f-4a54-a054-37395a13a6ab`.
+- First native thread: `01a15d52-87cd-7c60-bfb6-136214126f63`; visible reply: `ACK`.
+- After closing and reopening PowerShell, second native thread:
+  `01a15d53-2d3f-7c11-8870-c1c5d92302ef`; visible reply: `cobalt-731`.
+- The same Liminal session retained events 1–9 in order, including both user
+  messages, both visible replies, provenance, timestamps and two `turn.completed` events.
+
+This verifies **Shell-supplied context continuity** across process restart with
+separate native runtimes. It does not verify A → B → A brain switching, hidden
+runtime state migration, or native-session handoff. Earlier agent-host attempts
+were blocked by filesystem sandbox initialization; the successful user-run local
+smoke test supplies the real-generation evidence.
 
 Integration reference: [official Codex non-interactive mode documentation](https://developers.openai.com/codex/noninteractive).
 The installed CLI inspected during implementation was `codex-cli 0.155.1`.

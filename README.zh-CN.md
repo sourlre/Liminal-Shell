@@ -4,7 +4,7 @@
 
 [English](README.md)
 
-**状态：** 已实现 Phase 1 最小文本 CLI 纵切片：Shell 自持 session、本地 append-only timeline、重启续接，以及复用官方登录的 Codex adapter。自动测试已通过；当前宿主沙箱内的真实 Codex 生成仍未验证。换脑、memory 和下文的完整架构仍是设计。运行方式、验证与边界见 [Phase 1 说明](docs/phase-1.md)。
+**状态：** 已实现 Phase 1 最小文本 CLI 纵切片：Shell 自持 session、本地 append-only timeline、重启续接，以及复用官方登录的 Codex adapter。自动测试已通过；Windows 上的真实两轮 Codex smoke test 也已通过：同一个 Liminal session 在进程重启后，由两个不同的原生 Codex thread 接收 Shell 投射的历史并继续对话。换脑、memory 和下文的完整架构仍是设计。运行方式、验证与边界见 [Phase 1 说明](docs/phase-1.md)。
 
 更细的工程想法、尚未验证的接口与实验清单放在 [设计笔记](docs/design-notes.zh-CN.md) 里；README 只保留已经想清楚的主线。
 
