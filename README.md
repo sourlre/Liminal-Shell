@@ -4,7 +4,7 @@
 
 [中文版](README.zh-CN.md)
 
-**Status:** this repository currently preserves the design. Implementation has not started, and there is no need to rush it into a product.
+**Status:** a minimal Phase 1 text/CLI vertical slice is implemented: Shell-owned sessions, an append-only local timeline, restart continuation, and an official-login Codex adapter. Automated tests pass; real Codex generation remains unverified in the implementation host sandbox. Brain switching, memory and the broader architecture below remain design. See [running and validation](docs/phase-1.md).
 
 More detailed engineering ideas, unverified integration points, and future experiments are parked in the [Chinese design notes](docs/design-notes.zh-CN.md). The README keeps only the main line we currently believe in.
 
@@ -284,9 +284,7 @@ Those ideas are preserved in the [Chinese design notes](docs/design-notes.zh-CN.
 10. **Reuse mature runtimes first; move capabilities into the Shell only when real experiments justify it.**
 11. **Do not create a layer unless it owns a genuinely distinct responsibility.**
 
-For now, this repository does one thing:
-
-**it keeps the idea.**
+This repository now preserves the idea and a small runnable continuity experiment. The broader design below and in the notes remains a direction, not a list of shipped capabilities.
 
 It already has roots.
 
